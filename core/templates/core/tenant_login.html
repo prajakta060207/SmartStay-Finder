@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartStay Finder — Tenant Login</title>
+    <meta
+      name="description"
+      content="Students: log in or sign up to search hostels by location, compare details, and check real room vacancy on SmartStay Finder."
+    />
+    <style>
+      :root {
+        --brass: #e0aa4e;
+        --brass-dim: #c99a45;
+        --ink: #1b1533;
+        --ink2: #241b40;
+        --cream: #f6efe0;
+        --muted: #c7c0da;
+        --error: #e07a5f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: radial-gradient(circle at 70% 20%, #2a2050, var(--ink) 60%);
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        color: var(--cream);
+      }
+
+      h1,
+      h2 {
+        font-family: "Fraunces", Georgia, serif;
+        margin: 0;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(224, 170, 78, 0.25);
+        border-radius: 14px;
+        padding: 40px 36px;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      .back-link:hover {
+        color: var(--brass);
+      }
+
+      .icon-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .icon-row svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--brass);
+        flex-shrink: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 15px;
+        margin: 8px 0 28px;
+        line-height: 1.5;
+      }
+
+      .tabs {
+        display: flex;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 28px;
+      }
+
+      .tab-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+
+      .tab-btn.active {
+        background: var(--brass);
+        color: var(--ink);
+      }
+
+      form {
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+      }
+      form.active {
+        display: flex;
+      }
+
+      label {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+        display: block;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(224, 170, 78, 0.3);
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--cream);
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        border-color: var(--brass);
+      }
+
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(224, 170, 78, 0.3);
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--cream);
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      select:focus {
+        border-color: var(--brass);
+      }
+      select option {
+        background: var(--ink);
+        color: var(--cream);
+      }
+
+      .field-error {
+        color: var(--error);
+        font-size: 12px;
+        min-height: 16px;
+        margin-top: 4px;
+      }
+
+      .submit-btn {
+        margin-top: 8px;
+        background: var(--brass);
+        color: var(--ink);
+        border: none;
+        border-radius: 999px;
+        padding: 14px 0;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+
+      .submit-btn:hover {
+        background: var(--brass-dim);
+      }
+      .submit-btn:active {
+        transform: scale(0.98);
+      }
+
+      .switch-line {
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 20px;
+      }
+      .switch-line a {
+        color: var(--brass);
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      @media (max-width: 480px) {
+        .card {
+          padding: 32px 24px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <a href="{% url 'choose_role' %}" class="back-link"
+        >&larr; Not a tenant?</a
+      >
+
+      <div class="icon-row">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4 21v-1a8 8 0 0 1 16 0v1"></path>
+        </svg>
+        <h1>Tenant access</h1>
+      </div>
+      <p class="subtitle">
+        Search by location, compare hostels, and check real vacancy before you
+        visit.
+      </p>
+      {% if login_error %}
+      <div class="field-error">{{ login_error }}</div>
+      {% endif %} {% if signup_error %}
+      <div class="field-error">{{ signup_error }}</div>
+      {% endif %} {% if success %}
+      <div style="color: #8fbf8f; font-size: 14px; margin-bottom: 12px">
+        Account created! Please log in.
+      </div>
+      {% endif %}
+      <div class="tabs">
+        <button
+          class="tab-btn active"
+          id="loginTabBtn"
+          onclick="showTab('login')"
+        >
+          Log in
+        </button>
+        <button class="tab-btn" id="signupTabBtn" onclick="showTab('signup')">
+          Sign up
+        </button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form
+        id="loginForm"
+        class="active"
+        method="POST"
+        onsubmit="return validateLogin(event);"
+      >
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="login" />
+        <div>
+          <label for="loginEmail">Email</label>
+          <input
+            type="email"
+            id="loginEmail"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+          <div class="field-error" id="loginEmailError"></div>
+        </div>
+        <div>
+          <label for="loginPassword">Password</label>
+          <input
+            type="password"
+            id="loginPassword"
+            name="password"
+            placeholder="Enter your password"
+            required
+          />
+          <div class="field-error" id="loginPasswordError"></div>
+        </div>
+        <button type="submit" class="submit-btn">Log in</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form
+        id="signupForm"
+        method="POST"
+        onsubmit="return validateSignup(event);"
+      >
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="signup" />
+        <div>
+          <label for="tenantName">Your name</label>
+          <input
+            type="text"
+            id="tenantName"
+            name="name"
+            placeholder="Full name"
+            required
+          />
+          <div class="field-error" id="tenantNameError"></div>
+        </div>
+        <div>
+          <label for="tenantPhone">Phone number</label>
+          <input
+            type="tel"
+            id="tenantPhone"
+            name="phone"
+            placeholder="10-digit mobile number"
+            required
+          />
+          <div class="field-error" id="tenantPhoneError"></div>
+        </div>
+        <div>
+          <label for="tenantGender">Gender</label>
+          <select id="tenantGender" name="gender" required>
+            <option value="" disabled selected>Select gender</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+          <div class="field-error" id="tenantGenderError"></div>
+        </div>
+        <div>
+          <label for="signupEmail">Email</label>
+          <input
+            type="email"
+            id="signupEmail"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+          <div class="field-error" id="signupEmailError"></div>
+        </div>
+        <div>
+          <label for="signupPassword">Password</label>
+          <input
+            type="password"
+            id="signupPassword"
+            name="password"
+            placeholder="At least 8 characters"
+            required
+          />
+          <div class="field-error" id="signupPasswordError"></div>
+        </div>
+        <div>
+          <label for="signupConfirmPassword">Confirm password</label>
+          <input
+            type="password"
+            id="signupConfirmPassword"
+            name="confirm_password"
+            placeholder="Re-enter your password"
+            required
+          />
+          <div class="field-error" id="signupConfirmPasswordError"></div>
+        </div>
+        <button type="submit" class="submit-btn">Create tenant account</button>
+      </form>
+
+      <div class="switch-line" id="switchLine">
+        New here? <a onclick="showTab('signup')">Create a tenant account</a>
+      </div>
+    </div>
+
+    <script>
+      function showTab(tab) {
+        const loginForm = document.getElementById("loginForm");
+        const signupForm = document.getElementById("signupForm");
+        const loginBtn = document.getElementById("loginTabBtn");
+        const signupBtn = document.getElementById("signupTabBtn");
+        const switchLine = document.getElementById("switchLine");
+
+        if (tab === "login") {
+          loginForm.classList.add("active");
+          signupForm.classList.remove("active");
+          loginBtn.classList.add("active");
+          signupBtn.classList.remove("active");
+          switchLine.innerHTML =
+            "New here? <a onclick=\"showTab('signup')\">Create a tenant account</a>";
+        } else {
+          signupForm.classList.add("active");
+          loginForm.classList.remove("active");
+          signupBtn.classList.add("active");
+          loginBtn.classList.remove("active");
+          switchLine.innerHTML =
+            "Already have an account? <a onclick=\"showTab('login')\">Log in</a>";
+        }
+      }
+
+      function clearErrors(ids) {
+        ids.forEach((id) => (document.getElementById(id).textContent = ""));
+      }
+
+      function validateLogin(e) {
+        e.preventDefault();
+        clearErrors(["loginEmailError", "loginPasswordError"]);
+        let valid = true;
+
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          document.getElementById("loginEmailError").textContent =
+            "Enter a valid email address";
+          valid = false;
+        }
+        if (password.length < 1) {
+          document.getElementById("loginPasswordError").textContent =
+            "Password is required";
+          valid = false;
+        }
+
+        if (valid) {
+          // NOTE: this is a static front-end page for now.
+          // Once Django is connected, this will POST to the tenant login view instead.
+          e.target.submit();
+        }
+        return false;
+      }
+
+      function validateSignup(e) {
+        e.preventDefault();
+        clearErrors([
+          "tenantNameError",
+          "tenantPhoneError",
+          "tenantGenderError",
+          "signupEmailError",
+          "signupPasswordError",
+          "signupConfirmPasswordError",
+        ]);
+        let valid = true;
+
+        const name = document.getElementById("tenantName").value.trim();
+        const phone = document.getElementById("tenantPhone").value.trim();
+        const gender = document.getElementById("tenantGender").value;
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById(
+          "signupConfirmPassword",
+        ).value;
+
+        if (name.length < 2) {
+          document.getElementById("tenantNameError").textContent =
+            "Enter your full name";
+          valid = false;
+        }
+        if (!/^[6-9]\d{9}$/.test(phone)) {
+          document.getElementById("tenantPhoneError").textContent =
+            "Enter a valid 10-digit mobile number";
+          valid = false;
+        }
+        if (!gender) {
+          document.getElementById("tenantGenderError").textContent =
+            "Select your gender";
+          valid = false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          document.getElementById("signupEmailError").textContent =
+            "Enter a valid email address";
+          valid = false;
+        }
+        if (password.length < 8) {
+          document.getElementById("signupPasswordError").textContent =
+            "Password must be at least 8 characters";
+          valid = false;
+        }
+        if (confirmPassword !== password || confirmPassword.length === 0) {
+          document.getElementById("signupConfirmPasswordError").textContent =
+            "Passwords do not match";
+          valid = false;
+        }
+
+        if (valid) {
+          e.target.submit();
+        }
+        return false;
+      }
+    </script>
+  </body>
+</html>

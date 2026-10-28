@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ hostel.name }} — SmartStay Finder</title>
+<style>
+  :root { --brass:#e0aa4e; --ink:#1b1533; --cream:#f6efe0; --muted:#c7c0da; --error:#e07a5f; --green:#8fbf8f; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; padding:40px 20px; background: radial-gradient(circle at 70% 20%, #2a2050, var(--ink) 60%); font-family:'Inter',-apple-system,sans-serif; color:var(--cream); }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1, h2 { font-family:'Fraunces',Georgia,serif; margin:0 0 10px; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; display:inline-block; margin-bottom:18px; }
+  .back:hover { color:var(--brass); }
+  .cover { width:100%; max-height:300px; object-fit:cover; border-radius:14px; margin-bottom:20px; display:block; }
+  .panel { background:rgba(255,255,255,.04); border:1px solid rgba(224,170,78,.25); border-radius:14px; padding:20px 24px; margin-bottom:22px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px 28px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+  .v { font-size:15px; margin-bottom:4px; white-space:pre-line; }
+  .pill { display:inline-block; padding:3px 12px; border-radius:999px; font-size:12px; font-weight:700; margin:0 8px 6px 0; border:1px solid var(--brass); color:var(--brass); background:rgba(224,170,78,.12); }
+  .rooms { display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:14px; }
+  .room { background:rgba(255,255,255,.04); border:1px solid rgba(224,170,78,.25); border-radius:12px; overflow:hidden; }
+  .room img { width:100%; height:130px; object-fit:cover; display:block; }
+  .noimg { height:130px; display:flex; align-items:center; justify-content:center; color:var(--muted); background:rgba(0,0,0,.25); font-size:13px; }
+  .room .body { padding:12px 14px; }
+  .room h3 { margin:0 0 6px; font-family:'Fraunces',Georgia,serif; font-size:17px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+  .vacant { background:rgba(143,191,143,.18); color:var(--green); border:1px solid var(--green); }
+  .occupied { background:rgba(224,122,95,.15); color:var(--error); border:1px solid var(--error); }
+  .small { color:var(--muted); font-size:12px; margin-top:6px; }
+  a.photo { color:var(--brass); font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="javascript:history.back()">&larr; Back to results</a>
+  {% if hostel.cover_photo %}<img class="cover" src="{{ hostel.cover_photo.url }}" alt="{{ hostel.name }}">{% endif %}
+  <h1>{{ hostel.name }}</h1>
+  <p style="color:var(--muted);margin:0 0 20px;">{{ hostel.address }} &middot; {{ hostel.get_gender_preference_display }} hostel &middot; Contact: {{ hostel.contact_number }}</p>
+
+  {% if nearby %}
+  <div class="panel">
+    <h2 style="font-size:18px;">Nearby landmarks</h2>
+    {% for n in nearby %}<span class="pill">{{ n.name }} &mdash; {{ n.distance }} km</span>{% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="panel">
+    <h2 style="font-size:18px;">Rent &amp; terms</h2>
+    <div class="grid2">
+      <div><div class="k">Monthly rent</div><div class="v">Rs {{ hostel.rent }}{% if hostel.rent_increase_frequency != 'N' %} (increases by Rs {{ hostel.rent_increase_amount|default:"-" }} {{ hostel.get_rent_increase_frequency_display|lower }}){% endif %}</div></div>
+      <div><div class="k">Bond period</div><div class="v">{% if hostel.bond_required %}Yes{% if hostel.bond_months %} &mdash; {{ hostel.bond_months }} months{% endif %}{% else %}No{% endif %}</div></div>
+      <div><div class="k">Gate timing</div><div class="v">{{ hostel.gate_opening_time }} to {{ hostel.gate_closing_time }}</div></div>
+      <div><div class="k">Electricity bill</div><div class="v">{% if hostel.electricity_included %}Included{% else %}Not included{% endif %}</div></div>
+      <div><div class="k">Meals</div><div class="v">{% if hostel.food_included %}Included{% if hostel.meal_timings %}<br>{{ hostel.meal_timings }}{% endif %}{% else %}Not included{% endif %}</div></div>
+      <div><div class="k">Tiffin</div><div class="v">{% if hostel.tiffin_available %}Available{% if hostel.tiffin_timing %} &mdash; {{ hostel.tiffin_timing }}{% endif %}{% else %}Not available{% endif %}</div></div>
+      {% if hostel.cleaning_frequency %}<div><div class="k">Cleaning</div><div class="v">{{ hostel.get_cleaning_frequency_display }}</div></div>{% endif %}
+    </div>
+  </div>
+
+  {% if amenity_list or hostel.facilities %}
+  <div class="panel">
+    <h2 style="font-size:18px;">Amenities &amp; facilities</h2>
+    {% for a in amenity_list %}<span class="pill">{{ a }}</span>{% endfor %}
+    {% if hostel.facilities %}<div class="v" style="margin-top:8px;">{{ hostel.facilities }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if hostel.visitors_policy or hostel.guest_stay_policy or hostel.policies %}
+  <div class="panel">
+    <h2 style="font-size:18px;">Policies</h2>
+    {% if hostel.visitors_policy %}<div class="k">Visitors</div><div class="v">{{ hostel.visitors_policy }}</div>{% endif %}
+    {% if hostel.guest_stay_policy %}<div class="k" style="margin-top:10px;">Guest stay</div><div class="v">{{ hostel.guest_stay_policy }}</div>{% endif %}
+    {% if hostel.policies %}<div class="k" style="margin-top:10px;">Other policies</div><div class="v">{{ hostel.policies }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <h2>Rooms &mdash; {{ vacant }} of {{ total }} vacant</h2>
+  <div class="rooms">
+    {% for room in rooms %}
+      <div class="room">
+        {% if room.photo %}<a href="{{ room.photo.url }}" target="_blank"><img src="{{ room.photo.url }}" alt="Room {{ room.room_number }}"></a>{% else %}<div class="noimg">No photo</div>{% endif %}
+        <div class="body">
+          <h3>Room {{ room.room_number }}</h3>
+          {% if room.is_vacant %}<span class="badge vacant">Vacant</span>{% else %}<span class="badge occupied">Occupied</span>{% endif %}
+          {% if not room.is_vacant and room.expected_vacancy_date %}<div class="small">Expected vacancy: {{ room.expected_vacancy_date }}</div>{% endif %}
+          <div class="small">Updated: {{ room.last_updated }}{% if room.photo %} &middot; <a class="photo" href="{{ room.photo.url }}" target="_blank">Open photo</a>{% endif %}</div>
+        </div>
+      </div>
+    {% empty %}
+      <p style="color:var(--muted);">The owner has not added rooms yet.</p>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>

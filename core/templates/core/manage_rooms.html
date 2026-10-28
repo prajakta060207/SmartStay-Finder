@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartStay Finder — Manage Rooms</title>
+<style>
+  :root { --brass:#e0aa4e; --ink:#1b1533; --cream:#f6efe0; --muted:#c7c0da; --error:#e07a5f; --green:#8fbf8f; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; padding:40px 20px; background: radial-gradient(circle at 30% 20%, #2a2050, var(--ink) 60%); font-family:'Inter',-apple-system,sans-serif; color:var(--cream); }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1, h2 { font-family:'Fraunces',Georgia,serif; margin:0 0 8px; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; display:inline-block; margin-bottom:18px; }
+  .back:hover { color:var(--brass); }
+  .panel { background:rgba(255,255,255,.04); border:1px solid rgba(224,170,78,.25); border-radius:14px; padding:22px 24px; margin-bottom:28px; }
+  .field { margin-bottom:16px; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+  input[type=text], input[type=date], input[type=file] {
+    width:100%; padding:10px 14px; border-radius:8px; border:1px solid rgba(224,170,78,.3);
+    background:rgba(0,0,0,.25); color:var(--cream); font-family:inherit; font-size:15px; outline:none;
+  }
+  input[type=checkbox] { accent-color: var(--brass); margin-right:8px; }
+  .err { color:var(--error); font-size:12px; margin-top:4px; }
+  .submit { background:var(--brass); color:var(--ink); border:none; border-radius:999px; padding:12px 28px; font-size:15px; font-weight:700; cursor:pointer; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:16px; }
+  .room { background:rgba(255,255,255,.04); border:1px solid rgba(224,170,78,.25); border-radius:14px; overflow:hidden; }
+  .room img { width:100%; height:160px; object-fit:cover; display:block; }
+  .noimg { height:160px; display:flex; align-items:center; justify-content:center; color:var(--muted); background:rgba(0,0,0,.25); font-size:14px; }
+  .room .body { padding:14px 16px; }
+  .room h3 { margin:0 0 8px; font-family:'Fraunces',Georgia,serif; }
+  .badge { display:inline-block; padding:3px 12px; border-radius:999px; font-size:12px; font-weight:700; }
+  .vacant { background:rgba(143,191,143,.18); color:var(--green); border:1px solid var(--green); }
+  .occupied { background:rgba(224,122,95,.15); color:var(--error); border:1px solid var(--error); }
+  .meta { color:var(--muted); font-size:13px; margin:8px 0 12px; }
+  .toggle { background:transparent; border:1px solid var(--brass); color:var(--brass); border-radius:999px; padding:7px 16px; font-size:13px; cursor:pointer; font-weight:600; }
+  .empty { color:var(--muted); text-align:center; padding:30px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="{% url 'owner_dashboard' %}">&larr; Back to dashboard</a>
+  <h1>{{ hostel.name }}</h1>
+  <p style="color:var(--muted);margin:0 0 24px;">Manage rooms &mdash; add rooms and keep their availability up to date.</p>
+
+  <div class="panel">
+    <h2 style="font-size:20px;">Add a room</h2>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="err">{{ field.errors|join:", " }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="submit">Save room</button>
+    </form>
+  </div>
+
+  <h2>Your rooms</h2>
+  <div class="grid">
+    {% for room in rooms %}
+      <div class="room">
+        {% if room.photo %}<img src="{{ room.photo.url }}" alt="Room {{ room.room_number }}">{% else %}<div class="noimg">No photo</div>{% endif %}
+        <div class="body">
+          <h3>Room {{ room.room_number }}</h3>
+          {% if room.is_vacant %}<span class="badge vacant">Vacant</span>{% else %}<span class="badge occupied">Occupied</span>{% endif %}
+          <div class="meta">
+            {% if not room.is_vacant and room.expected_vacancy_date %}Expected vacancy: {{ room.expected_vacancy_date }}<br>{% endif %}
+            Last updated: {{ room.last_updated }}
+          </div>
+          <form method="POST" action="{% url 'toggle_room' room.id %}">
+            {% csrf_token %}
+            <button type="submit" class="toggle">{% if room.is_vacant %}Mark as occupied{% else %}Mark as vacant{% endif %}</button>
+          </form>
+                    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="toggle" style="text-decoration:none;" href="{% url 'edit_room' room.id %}">Edit / change photo</a>
+            <form method="POST" action="{% url 'delete_room' room.id %}" onsubmit="return confirm('Delete this room?');">
+              {% csrf_token %}
+              <button type="submit" class="toggle" style="border-color:#e07a5f;color:#e07a5f;">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty" style="grid-column:1/-1;">No rooms added yet.</div>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>
